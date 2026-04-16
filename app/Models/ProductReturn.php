@@ -15,15 +15,22 @@ class ProductReturn extends Model
     protected $fillable = [
         'return_number',
         'customer_id',
-        'invoice_id', // Can be null if not related to an invoice
+        'invoice_id',
         'return_date',
         'subtotal',
         'tax',
         'total',
+        'deduction_percent',
+        'deduction_amount',
         'payment_method',
         'status',
         'notes',
     ];
+
+    public function getNetTotalAttribute(): float
+    {
+        return (float) $this->total - (float) $this->deduction_amount;
+    }
 
     protected $casts = [
         'return_date' => 'date',

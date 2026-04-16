@@ -319,9 +319,19 @@
                     <td>{{ number_format($return->tax, 2) }}</td>
                 </tr>
                 @endif
-                <tr class="total-row">
-                    <th>Total Amount:</th>
+                <tr>
+                    <th>Gross Total:</th>
                     <td>{{ number_format($return->total, 2) }}</td>
+                </tr>
+                @if($return->deduction_percent > 0)
+                <tr>
+                    <th>Deduction ({{ number_format($return->deduction_percent, 2) }}%):</th>
+                    <td>- {{ number_format($return->deduction_amount, 2) }}</td>
+                </tr>
+                @endif
+                <tr class="total-row">
+                    <th>Net Return Amount:</th>
+                    <td>{{ number_format($return->net_total, 2) }}</td>
                 </tr>
                 <tr>
                     <th>Outstanding Before Return:</th>

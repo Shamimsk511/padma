@@ -105,7 +105,7 @@ class ProductReturnController extends Controller
                 ] : null,
                 'customer_id' => $return->customer_id,
                 'return_date' => $return->return_date->format('d M, Y'),
-                'total' => $return->total,
+                'total' => $return->net_total,
                 'status' => $return->status ?? 'pending',
             ];
         });
@@ -155,10 +155,15 @@ class ProductReturnController extends Controller
             'unit_price.*' => 'numeric|min:0',
             'item_total' => 'required|array',
             'item_total.*' => 'numeric|min:0',
+            'deduction_percent' => 'nullable|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
         try {
+            $deductionPercent = (float) ($request->deduction_percent ?? 0);
+            $deductionAmount = round((float) $request->total * $deductionPercent / 100, 2);
+            $netTotal = round((float) $request->total - $deductionAmount, 2);
+
             // Create product return record
             $productReturn = ProductReturn::create([
                 'return_number' => $request->return_number,
@@ -168,6 +173,8 @@ class ProductReturnController extends Controller
                 'subtotal' => $request->subtotal,
                 'tax' => $request->tax ?? 0,
                 'total' => $request->total,
+                'deduction_percent' => $deductionPercent,
+                'deduction_amount' => $deductionAmount,
                 'payment_method' => $request->payment_method,
                 'status' => 'completed',
                 'notes' => $request->notes,
@@ -213,18 +220,18 @@ class ProductReturnController extends Controller
                 'customer_id' => $customer->id,
                 'return_id' => $productReturn->id,
                 'invoice_id' => $request->invoice_id,
-                'type' => 'debit', // Debit because we're reducing what customer owes
+                'type' => 'debit',
                 'purpose' => 'Return #' . $productReturn->return_number,
                 'method' => $request->payment_method,
-                'amount' => $request->total,
-                'note' => 'Product return',
+                'amount' => $netTotal,
+                'note' => 'Product return' . ($deductionPercent > 0 ? " (deduction {$deductionPercent}%)" : ''),
                 'reference' => $productReturn->return_number,
             ]);
 
             $refundAmount = (float) ($request->refund_amount ?? 0);
             if ($refundAmount > 0) {
                 $outstandingBefore = (float) ($customer->outstanding_balance ?? 0);
-                $maxRefundable = max(0, $request->total - $outstandingBefore);
+                $maxRefundable = max(0, $netTotal - $outstandingBefore);
                 if ($refundAmount > $maxRefundable + 0.01) {
                     throw new \Exception("Refund amount exceeds allowed limit (max {$maxRefundable}).");
                 }
@@ -236,7 +243,7 @@ class ProductReturnController extends Controller
                 Transaction::create([
                     'customer_id' => $customer->id,
                     'return_id' => $productReturn->id,
-                    'type' => 'credit', // Credit to offset negative balance created by return
+                    'type' => 'credit',
                     'purpose' => 'Return Payment #' . $productReturn->return_number,
                     'method' => $request->payment_method,
                     'account_id' => $request->refund_account_id,
@@ -332,11 +339,15 @@ class ProductReturnController extends Controller
             'unit_price.*' => 'numeric|min:0',
             'item_total' => 'required|array',
             'item_total.*' => 'numeric|min:0',
-            
+            'deduction_percent' => 'nullable|numeric|min:0|max:100',
         ]);
 
         DB::beginTransaction();
         try {
+            $deductionPercent = (float) ($request->deduction_percent ?? 0);
+            $deductionAmount = round((float) $request->total * $deductionPercent / 100, 2);
+            $netTotal = round((float) $request->total - $deductionAmount, 2);
+
             $oldCustomerId = $return->customer_id;
             $oldTotal = $return->total;
             $existingItems = ProductReturnItem::withoutGlobalScopes()
@@ -364,6 +375,8 @@ class ProductReturnController extends Controller
                 'subtotal' => $request->subtotal,
                 'tax' => $request->tax ?? 0,
                 'total' => $request->total,
+                'deduction_percent' => $deductionPercent,
+                'deduction_amount' => $deductionAmount,
                 'payment_method' => $request->payment_method,
                 'notes' => $request->notes,
             ]);
@@ -415,8 +428,8 @@ class ProductReturnController extends Controller
                 'type' => 'debit',
                 'purpose' => 'Return #' . $return->return_number,
                 'method' => $request->payment_method,
-                'amount' => $request->total,
-                'note' => 'Product return (updated)',
+                'amount' => $netTotal,
+                'note' => 'Product return (updated)' . ($deductionPercent > 0 ? " (deduction {$deductionPercent}%)" : ''),
                 'reference' => $return->return_number,
             ]);
 
@@ -424,7 +437,7 @@ class ProductReturnController extends Controller
             $refundAmount = (float) ($request->refund_amount ?? 0);
             if ($refundAmount > 0) {
                 $outstandingBefore = (float) ($customer->outstanding_balance ?? 0);
-                $maxRefundable = max(0, $request->total - $outstandingBefore);
+                $maxRefundable = max(0, $netTotal - $outstandingBefore);
                 if ($refundAmount > $maxRefundable + 0.01) {
                     throw new \Exception("Refund amount exceeds allowed limit (max {$maxRefundable}).");
                 }

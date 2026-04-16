@@ -267,9 +267,27 @@
                         </div>
                         <div class="info-item">
                             <div class="info-label">
-                                <i class="fas fa-dollar-sign text-success"></i> Total Amount
+                                <i class="fas fa-dollar-sign text-success"></i> Gross Total
                             </div>
-                            <input type="number" name="total" id="total" class="form-control modern-input amount-display total-highlight" step="0.01" min="0" readonly required>
+                            <input type="number" name="total" id="total" class="form-control modern-input amount-display" step="0.01" min="0" readonly required>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-percent text-warning"></i> Deduction %
+                            </div>
+                            <input type="number" name="deduction_percent" id="deduction_percent" class="form-control modern-input" step="0.01" min="0" max="100" value="0">
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-minus-circle text-warning"></i> Deduction Amount
+                            </div>
+                            <input type="number" id="deduction_amount_display" class="form-control modern-input amount-display" step="0.01" readonly value="0.00">
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">
+                                <i class="fas fa-check-circle text-danger"></i> Net Return Amount
+                            </div>
+                            <input type="number" id="net_total_display" class="form-control modern-input amount-display total-highlight" step="0.01" readonly value="0.00">
                         </div>
                     </div>
                 </div>
@@ -1183,21 +1201,34 @@ $(document).ready(function() {
     // Calculate return totals
     function calculateReturnTotal() {
         let subtotal = 0;
-        
+
         $('.product-total').each(function() {
             subtotal += parseFloat($(this).val()) || 0;
         });
-        
-        const total = subtotal;
-        
+
         $('#subtotal').val(subtotal.toFixed(2));
-        $('#total').val(total.toFixed(2));
+        $('#total').val(subtotal.toFixed(2));
+        calculateDeduction();
+    }
+
+    function calculateDeduction() {
+        const grossTotal = parseFloat($('#total').val()) || 0;
+        const deductionPercent = parseFloat($('#deduction_percent').val()) || 0;
+        const deductionAmount = Math.round(grossTotal * deductionPercent / 100 * 100) / 100;
+        const netTotal = Math.round((grossTotal - deductionAmount) * 100) / 100;
+
+        $('#deduction_amount_display').val(deductionAmount.toFixed(2));
+        $('#net_total_display').val(netTotal.toFixed(2));
         updateRefundLimits();
     }
 
+    $('#deduction_percent').on('input', function() {
+        calculateDeduction();
+    });
+
     function updateRefundLimits() {
-        const returnTotal = parseFloat($('#total').val()) || 0;
-        const maxRefund = Math.max(0, returnTotal - customerOutstanding);
+        const netTotal = parseFloat($('#net_total_display').val()) || 0;
+        const maxRefund = Math.max(0, netTotal - customerOutstanding);
         const refundInput = $('#refund_amount');
         const refundSection = $('#refund-account-section');
 
@@ -1217,13 +1248,13 @@ $(document).ready(function() {
 
         $('#refund-help').text(maxRefund > 0
             ? `Max refundable now: ৳${maxRefund.toFixed(2)}`
-            : 'Refund available only if return exceeds outstanding');
+            : 'Refund available only if net return exceeds outstanding');
     }
 
     // Initialize tooltips
     $('[data-toggle="tooltip"]').tooltip();
 
-    updateRefundLimits();
+    calculateDeduction();
     
     console.log('Modern return form initialized successfully');
 });

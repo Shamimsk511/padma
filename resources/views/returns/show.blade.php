@@ -42,8 +42,8 @@
                     <i class="fas fa-dollar-sign"></i>
                 </div>
                 <div class="stats-content">
-                    <h3 class="stats-number">৳{{ number_format($return->total, 2) }}</h3>
-                    <p class="stats-label">Return Amount</p>
+                    <h3 class="stats-number">৳{{ number_format($return->net_total, 2) }}</h3>
+                    <p class="stats-label">Net Return Amount</p>
                 </div>
             </div>
         </div>
@@ -138,10 +138,13 @@
                     </div>
                     <div class="info-item">
                         <div class="info-label">
-                            <i class="fas fa-dollar-sign text-danger"></i> Return Amount
+                            <i class="fas fa-dollar-sign text-danger"></i> Net Return Amount
                         </div>
                         <div class="info-value balance-amount text-danger">
-                            ৳{{ number_format($return->total, 2) }}
+                            ৳{{ number_format($return->net_total, 2) }}
+                            @if($return->deduction_percent > 0)
+                                <small class="text-warning d-block">Gross: ৳{{ number_format($return->total, 2) }} | Deduction: {{ number_format($return->deduction_percent, 2) }}%</small>
+                            @endif
                         </div>
                     </div>
                     @if($return->notes)
@@ -273,9 +276,19 @@
                             <th>৳{{ number_format($return->tax, 2) }}</th>
                         </tr>
                         @endif
+                        <tr class="table-totals">
+                            <th colspan="6">Gross Total:</th>
+                            <th>৳{{ number_format($return->total, 2) }}</th>
+                        </tr>
+                        @if($return->deduction_percent > 0)
+                        <tr class="table-totals text-warning">
+                            <th colspan="6">Deduction ({{ number_format($return->deduction_percent, 2) }}%):</th>
+                            <th class="text-warning">- ৳{{ number_format($return->deduction_amount, 2) }}</th>
+                        </tr>
+                        @endif
                         <tr class="table-totals total-row">
-                            <th colspan="6">Total Return Amount:</th>
-                            <th class="text-danger">৳{{ number_format($return->total, 2) }}</th>
+                            <th colspan="6">Net Return Amount:</th>
+                            <th class="text-danger">৳{{ number_format($return->net_total, 2) }}</th>
                         </tr>
                     </tfoot>
                 </table>

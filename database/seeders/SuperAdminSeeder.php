@@ -22,7 +22,7 @@ class SuperAdminSeeder extends Seeder
         
         // Create Super Admin user
         $superAdmin = User::firstOrCreate(
-            ['email' => 'superadmin@gamil.com'],
+            ['email' => 'admin@rahmantile.com'],
             [
                 'name' => 'Super Admin',
                 'password' => bcrypt('sam25524'), // Change this to a secure password
