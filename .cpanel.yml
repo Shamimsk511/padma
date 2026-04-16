@@ -1,14 +1,6 @@
 ---
 deployment:
   tasks:
-    # Deploy to subdomain
-    - export SUBDEPLOYPATH=/home/zyankbqy/rahman.padmatrader.com
-    - /bin/cp -R * $SUBDEPLOYPATH
-    - /bin/cp -R .env $SUBDEPLOYPATH
-    - /bin/cp -R public/* $SUBDEPLOYPATH
-    - /bin/cp -R vendor $SUBDEPLOYPATH
-    - /bin/cp -R storage $SUBDEPLOYPATH
-
     # Deploy to main domain (public_html)
     - export MAINDEPLOYPATH=/home/zyankbqy/public_html
     - /bin/cp -R * $MAINDEPLOYPATH
@@ -16,3 +8,10 @@ deployment:
     - /bin/cp -R public/* $MAINDEPLOYPATH
     - /bin/cp -R vendor $MAINDEPLOYPATH
     - /bin/cp -R storage $MAINDEPLOYPATH
+    # Deploy to subdomain
+    - export SUBDEPLOYPATH=/home/zyankbqy/rahman.padmatrader.com
+    - /bin/cp -R * $SUBDEPLOYPATH
+    - /bin/cp -R .env $SUBDEPLOYPATH
+    - /bin/cp -R public/* $SUBDEPLOYPATH
+    - /bin/cp -R vendor $SUBDEPLOYPATH
+    - /bin/cp -R storage $SUBDEPLOYPATH
