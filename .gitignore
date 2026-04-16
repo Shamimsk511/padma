@@ -1,0 +1,29 @@
+# Laravel specific folders
+/vendor/
+/node_modules/
+/bootstrap/cache/
+/storage/
+/public/storage/
+
+# Environment and configuration files
+.env
+.env.example
+
+# IDE and system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Composer and NPM dependencies
+composer.lock
+package-lock.json
+yarn.lock
+
+# Log and cache files
+*.log
+*.cache
+
+# Miscellaneous
+public/hot
+public/storage
