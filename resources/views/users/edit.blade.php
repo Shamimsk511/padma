@@ -115,13 +115,29 @@
                         <label for="roles" class="font-weight-bold">
                             <i class="fas fa-user-tag mr-1"></i> Assign Roles
                         </label>
-                        <select name="roles[]" id="roles" class="form-control select2"  data-placeholder="Select roles">
-                            @foreach ($roles as $value => $label)
-                                <option value="{{ $value }}" {{ in_array($value, $userRole) ? 'selected' : '' }}>
-                                    {{ $label }}
-                                </option>
+                        @if($user->id === auth()->id())
+                            <div class="alert alert-warning py-2 mb-1">
+                                <i class="fas fa-lock mr-1"></i> You cannot change your own role.
+                            </div>
+                            @foreach($userRole as $role)
+                                <input type="hidden" name="roles[]" value="{{ $role }}">
                             @endforeach
-                        </select>
+                            <select id="roles" class="form-control select2" disabled data-placeholder="Select roles">
+                                @foreach ($roles as $value => $label)
+                                    <option value="{{ $value }}" {{ in_array($value, $userRole) ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @else
+                            <select name="roles[]" id="roles" class="form-control select2" data-placeholder="Select roles">
+                                @foreach ($roles as $value => $label)
+                                    <option value="{{ $value }}" {{ in_array($value, $userRole) ? 'selected' : '' }}>
+                                        {{ $label }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        @endif
                     </div>
                 </div>
             </div>

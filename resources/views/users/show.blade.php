@@ -76,9 +76,12 @@
             </div>
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between">
+                    @if(auth()->user()->can('user-edit') && auth()->user()->can('update', $user))
                     <a href="{{ route('users.edit', $user->id) }}" class="btn btn-info">
                         <i class="fas fa-edit mr-1"></i> Edit
                     </a>
+                    @endif
+                    @if(auth()->user()->can('user-delete') && auth()->user()->can('delete', $user))
                     <form action="{{ route('users.destroy', $user->id) }}" method="POST">
                         @csrf
                         @method('DELETE')
@@ -86,6 +89,7 @@
                             <i class="fas fa-trash mr-1"></i> Delete
                         </button>
                     </form>
+                    @endif
                 </div>
             </div>
         </div>

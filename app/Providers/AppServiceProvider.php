@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use App\Models\User;
+use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use App\Services\PaymentAllocationService;
@@ -46,6 +48,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('super-admin-only', function ($user) {
             return $user->hasRole('Super Admin');
         });
+        Gate::policy(User::class, UserPolicy::class);
 
         Number::useCurrency('BDT');
         Paginator::useBootstrap();

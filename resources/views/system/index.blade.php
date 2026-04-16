@@ -427,9 +427,11 @@
                 <li class="nav-item">
                     <a class="nav-link" id="tab-backups-link" data-toggle="pill" href="#tab-backups" role="tab">Backups</a>
                 </li>
+                @if(auth()->user()->hasRole('Super Admin'))
                 <li class="nav-item">
                     <a class="nav-link" id="tab-updates-link" data-toggle="pill" href="#tab-updates" role="tab">Updates</a>
                 </li>
+                @endif
             </ul>
         </div>
     </div>
@@ -497,6 +499,7 @@
                                 </div>
                                 <button type="button" class="btn modern-btn modern-btn-outline js-action" data-method="POST" data-url="{{ route('system.update.storage-link') }}">Run</button>
                             </div>
+                            @if(auth()->user()->hasRole('Super Admin'))
                             <div class="system-action debug-action">
                                 <div>
                                     <div class="action-title">Debug Mode</div>
@@ -512,6 +515,7 @@
                                     </label>
                                 </div>
                             </div>
+                            @endif
                         </div>
                     </div>
 
@@ -669,6 +673,7 @@
                 </div>
             </div>
         </div>
+        @if(auth()->user()->hasRole('Super Admin'))
         <div class="tab-pane fade" id="tab-updates" role="tabpanel">
             <div class="row">
                 <div class="col-lg-4">
@@ -791,5 +796,6 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 @stop

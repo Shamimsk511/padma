@@ -5,6 +5,7 @@ namespace App\Models;
 use Laravel\Sanctum\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
@@ -99,6 +100,21 @@ class User extends Authenticatable
         }
 
         return (int) $this->tenant_id === (int) $tenantId;
+    }
+
+    public function scopeVisibleTo(Builder $query, User $user): Builder
+    {
+        if ($user->hasRole('Super Admin')) {
+            return $query;
+        }
+        return $query
+            ->where('tenant_id', $user->tenant_id)
+            ->whereDoesntHave('roles', fn ($q) => $q->where('name', 'Super Admin'));
+    }
+
+    public function maxRoleLevel(): int
+    {
+        return (int) ($this->roles()->max('level') ?? 0);
     }
 
     public function attachTenant(int $tenantId, bool $setPrimary = false): void

@@ -212,20 +212,16 @@ class DatabaseUpdateController extends Controller
             // Include and run the migration
             $migration = require $migrationFile->getPathname();
 
-            DB::beginTransaction();
-
             if (method_exists($migration, 'up')) {
                 $migration->up();
             }
 
-            // Record the migration
+            // Record the migration (outside any transaction — DDL auto-commits on MySQL)
             $batch = DB::table('migrations')->max('batch') + 1;
             DB::table('migrations')->insert([
                 'migration' => $migrationName,
                 'batch' => $batch,
             ]);
-
-            DB::commit();
 
             return response()->json([
                 'success' => true,
@@ -234,8 +230,6 @@ class DatabaseUpdateController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack();
-
             return response()->json([
                 'success' => false,
                 'message' => 'Migration failed: ' . $e->getMessage(),

@@ -837,7 +837,7 @@ return [
         // =====================================================================
         [
             'header' => 'SYSTEM',
-            'can' => ['business-settings-view', 'erp-features-view'],
+            'can' => 'business-settings-view',
         ],
         [
             'text' => 'Business Settings',
@@ -855,13 +855,12 @@ return [
             'text' => 'Feature Settings',
             'url'  => 'erp-settings/features',
             'icon' => 'fas fa-toggle-on',
-            'can'  => 'erp-features-view',
+            'can'  => 'super-admin-only',
         ],
         [
             'text' => 'System Tools',
             'route' => 'system.index',
             'icon' => 'fas fa-server',
-            'can' => 'business-settings-view',
         ],
         [
             'text' => 'Trash',
@@ -872,19 +871,19 @@ return [
         [
             'text' => 'SMS Management',
             'icon' => 'fas fa-sms',
-            'can'  => ['business-settings-view'],
+            'can'  => 'super-admin-only',
             'submenu' => [
                 [
                     'text' => 'Dashboard',
                     'url'  => 'sms/dashboard',
                     'icon' => 'fas fa-tachometer-alt',
-                    'can'  => 'business-settings-view',
+                    'can'  => 'super-admin-only',
                 ],
                 [
                     'text' => 'Settings',
                     'url'  => 'sms/settings',
                     'icon' => 'fas fa-cogs',
-                    'can'  => 'business-settings-view',
+                    'can'  => 'super-admin-only',
                 ],
             ],
         ],

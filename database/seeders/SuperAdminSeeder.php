@@ -13,10 +13,12 @@ class SuperAdminSeeder extends Seeder
     {
         // Create a Super Admin role
         $superAdminRole = Role::firstOrCreate(['name' => 'Super Admin']);
-        
+        $superAdminRole->level = 100;
+        $superAdminRole->save();
+
         // Get all permissions
         $permissions = Permission::all();
-        
+
         // Assign all permissions to Super Admin role
         $superAdminRole->syncPermissions($permissions);
         

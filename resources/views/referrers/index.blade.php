@@ -59,12 +59,18 @@
                                 </td>
                                 <td>
                                     <div class="btn-group">
-                                        <a href="{{ route('referrers.show', $referrer->id) }}" class="btn btn-sm btn-info">View</a>
-                                        <a href="{{ route('referrers.edit', $referrer->id) }}" class="btn btn-sm btn-primary">Edit</a>
+                                        <a href="{{ route('referrers.show', $referrer->id) }}" class="btn modern-btn modern-btn-info btn-sm">
+                                            <i class="fas fa-eye"></i> View
+                                        </a>
+                                        <a href="{{ route('referrers.edit', $referrer->id) }}" class="btn modern-btn modern-btn-warning btn-sm">
+                                            <i class="fas fa-edit"></i> Edit
+                                        </a>
                                         <form action="{{ route('referrers.destroy', $referrer->id) }}" method="POST" onsubmit="return confirm('Delete this referrer?')" style="display:inline;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                                            <button type="submit" class="btn modern-btn modern-btn-danger btn-sm">
+                                                <i class="fas fa-trash"></i> Delete
+                                            </button>
                                         </form>
                                     </div>
                                 </td>

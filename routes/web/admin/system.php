@@ -3,7 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\SystemManagementController;
 
-Route::prefix('system')->name('system.')->middleware('can:update,App\Models\User')->group(function () {
+Route::prefix('system')->name('system.')->group(function () {
     Route::get('/', [SystemManagementController::class, 'index'])->name('index');
     
     // Cache Management

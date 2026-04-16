@@ -16,6 +16,7 @@
                 <i class="fas fa-user-tag"></i> Referrer Information
             </h3>
         </div>
+
         <div class="card-body">
             @if ($errors->any())
                 <div class="modern-alert modern-alert-danger mb-4">
@@ -36,13 +37,21 @@
             <form action="{{ route('referrers.update', $referrer->id) }}" method="POST" class="modern-form">
                 @csrf
                 @method('PUT')
+
                 <div class="form-grid">
+
                     <div class="form-group-modern full-width">
-                        <label for="name" class="modern-label">
+                        <label for="name" class="modern-label required">
                             <i class="fas fa-user"></i>
-                            Referrer Name <span class="required">*</span>
+                            Referrer Name
                         </label>
-                        <input type="text" name="name" id="name" class="modern-input" value="{{ old('name', $referrer->name) }}" required>
+                        <input type="text"
+                               name="name"
+                               id="name"
+                               class="modern-input"
+                               placeholder="Enter referrer name"
+                               value="{{ old('name', $referrer->name) }}"
+                               required>
                     </div>
 
                     <div class="form-group-modern half-width">
@@ -50,7 +59,12 @@
                             <i class="fas fa-phone"></i>
                             Phone
                         </label>
-                        <input type="text" name="phone" id="phone" class="modern-input" value="{{ old('phone', $referrer->phone) }}">
+                        <input type="text"
+                               name="phone"
+                               id="phone"
+                               class="modern-input"
+                               placeholder="Enter phone number"
+                               value="{{ old('phone', $referrer->phone) }}">
                     </div>
 
                     <div class="form-group-modern half-width">
@@ -58,7 +72,12 @@
                             <i class="fas fa-briefcase"></i>
                             Profession
                         </label>
-                        <input type="text" name="profession" id="profession" class="modern-input" value="{{ old('profession', $referrer->profession) }}">
+                        <input type="text"
+                               name="profession"
+                               id="profession"
+                               class="modern-input"
+                               placeholder="Enter profession"
+                               value="{{ old('profession', $referrer->profession) }}">
                     </div>
 
                     <div class="form-group-modern full-width">
@@ -66,7 +85,11 @@
                             <i class="fas fa-sticky-note"></i>
                             Note
                         </label>
-                        <textarea name="note" id="note" class="modern-input" rows="3">{{ old('note', $referrer->note) }}</textarea>
+                        <textarea name="note"
+                                  id="note"
+                                  class="modern-input"
+                                  rows="3"
+                                  placeholder="Enter any notes">{{ old('note', $referrer->note) }}</textarea>
                     </div>
 
                     <div class="form-group-modern half-width">
@@ -74,8 +97,13 @@
                             <i class="fas fa-hand-holding-usd"></i>
                             Compensation
                         </label>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="compensation_enabled" name="compensation_enabled" value="1" {{ old('compensation_enabled', $referrer->compensation_enabled) ? 'checked' : '' }}>
+                        <div class="custom-control custom-switch mt-1">
+                            <input type="checkbox"
+                                   class="custom-control-input"
+                                   id="compensation_enabled"
+                                   name="compensation_enabled"
+                                   value="1"
+                                   {{ old('compensation_enabled', $referrer->compensation_enabled) ? 'checked' : '' }}>
                             <label class="custom-control-label" for="compensation_enabled">Enable Compensation</label>
                         </div>
                     </div>
@@ -85,11 +113,17 @@
                             <i class="fas fa-gift"></i>
                             Gift
                         </label>
-                        <div class="custom-control custom-switch">
-                            <input type="checkbox" class="custom-control-input" id="gift_enabled" name="gift_enabled" value="1" {{ old('gift_enabled', $referrer->gift_enabled) ? 'checked' : '' }}>
+                        <div class="custom-control custom-switch mt-1">
+                            <input type="checkbox"
+                                   class="custom-control-input"
+                                   id="gift_enabled"
+                                   name="gift_enabled"
+                                   value="1"
+                                   {{ old('gift_enabled', $referrer->gift_enabled) ? 'checked' : '' }}>
                             <label class="custom-control-label" for="gift_enabled">Enable Gift</label>
                         </div>
                     </div>
+
                 </div>
 
                 <div class="form-actions">
@@ -103,4 +137,118 @@
             </form>
         </div>
     </div>
+@stop
+
+@section('additional_css')
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.form-group-modern.full-width {
+    grid-column: 1 / -1;
+}
+
+.form-group-modern.half-width {
+    grid-column: span 1;
+}
+
+.form-group-modern {
+    margin-bottom: 0;
+}
+
+.modern-form {
+    padding: 0;
+}
+
+.modern-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.modern-label i {
+    margin-right: 0.5rem;
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: white;
+}
+
+.modern-input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-color);
+}
+
+.modern-alert {
+    display: flex;
+    align-items: flex-start;
+    padding: 1rem 1.5rem;
+    border-radius: var(--border-radius);
+    margin-bottom: 1.5rem;
+}
+
+.modern-alert-danger {
+    background: linear-gradient(135deg, #fee 0%, #fdd 100%);
+    border-left: 4px solid #dc3545;
+}
+
+.alert-icon {
+    margin-right: 1rem;
+    font-size: 1.25rem;
+    color: #dc3545;
+}
+
+.alert-content h5 {
+    margin: 0 0 0.5rem 0;
+    color: #721c24;
+    font-weight: 600;
+}
+
+.error-list {
+    margin: 0;
+    padding-left: 1.25rem;
+    color: #721c24;
+}
+
+.error-list li {
+    margin-bottom: 0.25rem;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    .form-group-modern.half-width {
+        grid-column: 1;
+    }
+    .form-actions {
+        flex-direction: column;
+    }
+}
+</style>
 @stop

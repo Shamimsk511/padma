@@ -121,18 +121,22 @@ class DashboardController extends Controller
 
     protected function tenantUsersQuery()
     {
+        $authUser = auth()->user();
         $tenantId = TenantContext::currentId();
 
-        if (!$tenantId) {
-            return User::query();
+        if ($authUser->hasRole('Super Admin')) {
+            if (!$tenantId) {
+                return User::query();
+            }
+            return User::query()->where(function ($query) use ($tenantId) {
+                $query->where('tenant_id', $tenantId)
+                    ->orWhereHas('tenants', function ($tenantQuery) use ($tenantId) {
+                        $tenantQuery->where('tenants.id', $tenantId);
+                    });
+            });
         }
 
-        return User::query()->where(function ($query) use ($tenantId) {
-            $query->where('tenant_id', $tenantId)
-                ->orWhereHas('tenants', function ($tenantQuery) use ($tenantId) {
-                    $tenantQuery->where('tenants.id', $tenantId);
-                });
-        });
+        return User::visibleTo($authUser);
     }
 
     protected function getTodayStats(): array

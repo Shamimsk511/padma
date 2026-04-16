@@ -122,18 +122,22 @@
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('referrers.show', $referrer->id) }}">
-                <div class="row">
-                    <div class="col-md-3">
-                        <label class="form-label">Invoice Type</label>
-                        <select name="invoice_type" class="form-control modern-input">
+                <div class="form-grid">
+                    <div class="form-group-modern half-width">
+                        <label class="modern-label">
+                            <i class="fas fa-tag"></i> Invoice Type
+                        </label>
+                        <select name="invoice_type" class="modern-input">
                             <option value="">All</option>
                             <option value="tiles" {{ $invoiceType === 'tiles' ? 'selected' : '' }}>Tiles</option>
                             <option value="other" {{ $invoiceType === 'other' ? 'selected' : '' }}>Other</option>
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Product Category</label>
-                        <select name="category_id" class="form-control modern-input">
+                    <div class="form-group-modern half-width">
+                        <label class="modern-label">
+                            <i class="fas fa-tags"></i> Product Category
+                        </label>
+                        <select name="category_id" class="modern-input">
                             <option value="">All</option>
                             @foreach($categories as $category)
                                 <option value="{{ $category->id }}" {{ (string) $categoryId === (string) $category->id ? 'selected' : '' }}>
@@ -142,16 +146,20 @@
                             @endforeach
                         </select>
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Date From</label>
-                        <input type="date" name="date_from" class="form-control modern-input" value="{{ $dateFrom }}">
+                    <div class="form-group-modern half-width">
+                        <label class="modern-label">
+                            <i class="fas fa-calendar-alt"></i> Date From
+                        </label>
+                        <input type="date" name="date_from" class="modern-input" value="{{ $dateFrom }}">
                     </div>
-                    <div class="col-md-3">
-                        <label class="form-label">Date To</label>
-                        <input type="date" name="date_to" class="form-control modern-input" value="{{ $dateTo }}">
+                    <div class="form-group-modern half-width">
+                        <label class="modern-label">
+                            <i class="fas fa-calendar-alt"></i> Date To
+                        </label>
+                        <input type="date" name="date_to" class="modern-input" value="{{ $dateTo }}">
                     </div>
                 </div>
-                <div class="mt-3 d-flex gap-2">
+                <div class="form-actions" style="justify-content: flex-start; border-top: none; padding-top: 0.5rem;">
                     <button type="submit" class="btn modern-btn modern-btn-primary">
                         <i class="fas fa-search"></i> Apply
                     </button>
@@ -235,6 +243,33 @@
             </div>
         </div>
     </div>
+@stop
+
+@section('additional_css')
+<style>
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1rem;
+}
+.form-group-modern.half-width { grid-column: span 1; }
+.form-group-modern { display: flex; flex-direction: column; margin-bottom: 0; }
+.modern-label {
+    display: flex;
+    align-items: center;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+}
+.modern-label i { margin-right: 0.5rem; color: var(--primary-color); width: 16px; }
+.form-actions { display: flex; gap: 1rem; }
+@media (max-width: 768px) {
+    .form-grid { grid-template-columns: 1fr; gap: 1rem; }
+    .form-group-modern.half-width { grid-column: 1; }
+}
+</style>
 @stop
 
 @section('additional_js')

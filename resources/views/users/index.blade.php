@@ -136,15 +136,17 @@
                                 </td>
                                 <td>
                                     <div class="users-actions">
+                                        @can('view', $user)
                                         <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-success users-action-btn">
                                             <i class="fas fa-eye"></i> View
                                         </a>
-                                        @can('user-edit')
+                                        @endcan
+                                        @if(auth()->user()->can('user-edit') && auth()->user()->can('update', $user))
                                         <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-info users-action-btn">
                                             <i class="fas fa-edit"></i> Edit
                                         </a>
-                                        @endcan
-                                        @can('user-delete')
+                                        @endif
+                                        @if(auth()->user()->can('user-delete') && auth()->user()->can('delete', $user))
                                         <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
                                             @csrf
                                             @method('DELETE')
@@ -152,7 +154,7 @@
                                                 <i class="fas fa-trash"></i> Delete
                                             </button>
                                         </form>
-                                        @endcan
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
