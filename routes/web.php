@@ -24,6 +24,7 @@ require __DIR__.'/customer.php';
 Route::middleware(['auth:web', 'verified', 'feature', 'tenant'])->group(function () {
         Route::get('/', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/live', [DashboardController::class, 'live'])->name('dashboard.live');
+    Route::post('/dashboard/suppress-delivery-alert', [DashboardController::class, 'suppressDeliveryAlert'])->name('dashboard.suppress-delivery-alert');
     Route::get('/global-search', GlobalSearchController::class)->name('global-search');
 
     Route::middleware('role:Super Admin')->group(function () {

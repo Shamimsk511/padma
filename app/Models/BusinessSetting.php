@@ -16,12 +16,13 @@ class BusinessSetting extends Model
         'return_policy_days', 'return_policy_message',
         'footer_message', 'timezone', 'theme', 'weekend_days',
         'invoice_template', 'invoice_print_options',
-        'customer_qr_expiry_days'
+        'customer_qr_expiry_days', 'delivery_alert_enabled',
     ];
 
     protected $casts = [
         'weekend_days' => 'array',
         'invoice_print_options' => 'array',
+        'delivery_alert_enabled' => 'boolean',
     ];
     protected static function booted()
     {

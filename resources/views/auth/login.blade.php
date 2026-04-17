@@ -529,9 +529,11 @@
                             class="form-input @error('tenant_id') is-invalid @enderror"
                             required
                         >
-                            <option value="">Select Company</option>
+                            @if($tenants->count() !== 1)
+                                <option value="">Select Company</option>
+                            @endif
                             @foreach($tenants as $tenant)
-                                <option value="{{ $tenant->id }}" {{ old('tenant_id') == $tenant->id ? 'selected' : '' }}>
+                                <option value="{{ $tenant->id }}" {{ (old('tenant_id') == $tenant->id || $tenants->count() === 1) ? 'selected' : '' }}>
                                     {{ $tenant->name }}
                                 </option>
                             @endforeach

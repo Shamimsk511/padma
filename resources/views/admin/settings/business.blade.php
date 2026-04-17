@@ -594,6 +594,27 @@
 
                                 <div class="form-group-modern half-width">
                                     <label class="modern-label">
+                                        <i class="fas fa-truck"></i> Undelivered Invoices Alert
+                                    </label>
+                                    <div class="invoice-toggle-item">
+                                        <input type="hidden" name="delivery_alert_enabled" value="0">
+                                        <div class="custom-control custom-switch">
+                                            <input type="checkbox"
+                                                   class="custom-control-input"
+                                                   id="delivery_alert_enabled"
+                                                   name="delivery_alert_enabled"
+                                                   value="1"
+                                                   {{ old('delivery_alert_enabled', $settings->delivery_alert_enabled ?? true) ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="delivery_alert_enabled">
+                                                <i class="fas fa-bell"></i> Show alert modal on login when there are undelivered invoices
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">When enabled, a popup appears after login listing yesterday's and older pending/partial deliveries.</small>
+                                </div>
+
+                                <div class="form-group-modern half-width">
+                                    <label class="modern-label">
                                         <i class="fas fa-calendar-week"></i> Weekend Days
                                     </label>
                                     <div class="weekend-grid">

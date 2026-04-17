@@ -88,6 +88,8 @@ class AuthenticatedSessionController extends Controller
 
         TenantContext::set((int) $tenantId);
 
+        session(['delivery_alert_pending' => true]);
+
         return redirect()->intended('/');
     }
 

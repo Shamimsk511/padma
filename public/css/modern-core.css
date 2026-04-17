@@ -313,8 +313,25 @@
             .modern-header {
                 padding: 0.75rem 1rem;
             }
-            
+
             .section-content {
                 padding: 0.75rem;
             }
+        }
+
+        /* Selects inside headers: force light-mode native rendering */
+        .modern-header select {
+            color: #1f2937 !important;
+            background: #ffffff !important;
+            color-scheme: light;
+        }
+
+        /* Remove number input spinners globally */
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none !important;
+            margin: 0 !important;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield !important;
         }

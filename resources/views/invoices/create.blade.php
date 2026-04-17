@@ -550,7 +550,6 @@ input[type=number] {
 @section('additional_js')
 <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 <script>
     $(document).ready(function() {
         // Initialize Select2
@@ -1299,15 +1298,15 @@ function handleProductSelection(selectElement) {
     
     if (productId) {
         $.ajax({
-            url: '/product-details/' + productId,
+            url: '/product-details/' + productId + '?customer_id=' + ($('#customer_id').val() || ''),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
                 row.find('.product-description').val(data.name);
                 row.find('.product-company').val(data.company ? data.company.name : '');
                 row.find('.product-category').val(data.category ? data.category.name : '');
-                row.find('.product-price').val(data.sale_price);
-                
+                row.find('.product-price').val(data.customer_price);
+
                 row.data('box-pcs', data.category ? data.category.box_pcs : 0);
                 row.data('pieces-feet', data.category ? data.category.pieces_feet : 0);
                 // Prioritize product weight over category weight
@@ -1317,15 +1316,24 @@ function handleProductSelection(selectElement) {
                 const categoryWeightUnit = data.category ? (data.category.weight_unit || '') : '';
                 row.data('weight-value', productWeightValue > 0 && productWeightUnit ? productWeightValue : categoryWeightValue);
                 row.data('weight-unit', productWeightValue > 0 && productWeightUnit ? productWeightUnit : categoryWeightUnit);
-                
+
+                // Store is_simple_product: true = simple/other, false = tiles
+                const isSimple = data.category ? !!data.category.is_simple_product : true;
+                row.data('is-simple-product', isSimple);
+
+                // If tiles product selected while invoice type is "other", auto-switch to tiles
+                if (!isSimple && $('input[name="invoice_type"]:checked').val() === 'other') {
+                    $('#invoice_type_tiles').prop('checked', true).trigger('change');
+                }
+
                 row.find('.product-quantity').val('');
                 row.find('.product-boxes').val('');
                 row.find('.product-pieces').val('');
                 row.find('.product-total').val('');
-                
+
                 // Update totals after clearing values
                 calculateProductTotals();
-                
+
                 row.find('.product-quantity').focus();
             },
             error: function() {
@@ -1339,7 +1347,8 @@ function handleProductSelection(selectElement) {
         row.data('pieces-feet', 0);
         row.data('weight-value', 0);
         row.data('weight-unit', '');
-        
+        row.removeData('is-simple-product');
+
         // Update totals after clearing values
         calculateProductTotals();
     }
@@ -1389,6 +1398,26 @@ function validateField(field) {
 }
 
 function submitInvoiceForm(formData, forceNegativeStock = false) {
+    // Determine correct invoice_type from per-row AJAX data:
+    // any row with is-simple-product===false → tiles; all true → other; unset rows ignored
+    let hasTilesProduct = false;
+    let hasProductsForTypeCheck = false;
+    $('.product-row').each(function() {
+        const pid = $(this).find('.product-select').val();
+        if (pid && pid !== '__new__') {
+            const simple = $(this).data('is-simple-product');
+            if (simple !== undefined) {
+                hasProductsForTypeCheck = true;
+                if (simple === false) {
+                    hasTilesProduct = true;
+                }
+            }
+        }
+    });
+    if (hasProductsForTypeCheck) {
+        formData.set('invoice_type', hasTilesProduct ? 'tiles' : 'other');
+    }
+
     // Check if at least one product row has valid data
     let hasValidProduct = false;
     $('.product-row').each(function() {

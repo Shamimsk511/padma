@@ -194,6 +194,85 @@
         </div>
     </div>
 </div>
+
+{{-- ===== DELIVERY ALERT MODAL (triggered on login) ===== --}}
+@if($deliveryAlert['show'])
+<div class="modal fade dalert-modal" id="deliveryAlertModal" tabindex="-1" role="dialog"
+     aria-labelledby="deliveryAlertModalLabel" aria-hidden="true"
+     data-backdrop="static" data-keyboard="false">
+    <div class="modal-dialog modal-xl" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header dalert-header">
+                <h5 class="modal-title text-white font-weight-bold" id="deliveryAlertModalLabel">
+                    <i class="fas fa-truck-loading mr-2"></i>
+                    Undelivered Invoices Require Attention
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal"><span>&times;</span></button>
+            </div>
+
+            <div class="modal-body p-0">
+                <ul class="nav nav-tabs px-3 pt-2 dalert-tabs" id="deliveryAlertTabs">
+                    <li class="nav-item">
+                        <a class="nav-link {{ $deliveryAlert['yesterday']->isNotEmpty() ? 'active' : '' }}"
+                           data-toggle="tab" href="#dalert-yesterday">
+                            <i class="fas fa-calendar-day mr-1"></i> Yesterday
+                            @if($deliveryAlert['yesterday']->isNotEmpty())
+                                <span class="badge badge-warning ml-1">{{ $deliveryAlert['yesterday']->count() }}</span>
+                            @endif
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ $deliveryAlert['yesterday']->isEmpty() ? 'active' : '' }}"
+                           data-toggle="tab" href="#dalert-older">
+                            <i class="fas fa-history mr-1"></i> Older
+                            @if($deliveryAlert['older']->isNotEmpty())
+                                <span class="badge badge-danger ml-1">{{ $deliveryAlert['older']->count() }}</span>
+                            @endif
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="tab-content px-3 py-3">
+                    <div class="tab-pane fade {{ $deliveryAlert['yesterday']->isNotEmpty() ? 'show active' : '' }}" id="dalert-yesterday">
+                        @if($deliveryAlert['yesterday']->isEmpty())
+                            <p class="text-center text-muted py-4"><i class="fas fa-check-circle text-success mr-1"></i> No undelivered invoices from yesterday.</p>
+                        @else
+                            @include('dashboard._delivery_table', ['invoices' => $deliveryAlert['yesterday']])
+                        @endif
+                    </div>
+                    <div class="tab-pane fade {{ $deliveryAlert['yesterday']->isEmpty() ? 'show active' : '' }}" id="dalert-older">
+                        @if($deliveryAlert['older']->isEmpty())
+                            <p class="text-center text-muted py-4"><i class="fas fa-check-circle text-success mr-1"></i> No older undelivered invoices.</p>
+                        @else
+                            @include('dashboard._delivery_table', ['invoices' => $deliveryAlert['older']])
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer dalert-footer">
+                <div class="dalert-suppress-wrap">
+                    <div class="custom-control custom-checkbox">
+                        <input type="checkbox" class="custom-control-input" id="dalertSuppressToday">
+                        <label class="custom-control-label text-muted" for="dalertSuppressToday"
+                               style="font-size:12px;">Don't show again today</label>
+                    </div>
+                </div>
+                <div class="d-flex" style="gap:8px;">
+                    <a href="{{ route('sales.remaining_products') }}" class="btn modern-btn modern-btn-secondary btn-sm">
+                        <i class="fas fa-list-alt mr-1"></i> View All Remaining
+                    </a>
+                    <button type="button" class="btn modern-btn modern-btn-danger btn-sm" id="dalertDismissBtn">
+                        <i class="fas fa-times mr-1"></i> Dismiss
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+@endif
 @stop
 
 @section('additional_css')
@@ -308,6 +387,16 @@
     @media (max-width:1399.98px){.chip-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
     @media (max-width:1199.98px){.kpi-grid{grid-template-columns:repeat(1,minmax(0,1fr))}}
     @media (max-width:991.98px){.dash-shell{padding:9px;min-height:auto}.curve-fixed-height{height:190px}.dash-chat-messages{height:170px}.analog-clock{width:180px;height:180px}.mini-cal{width:240px;min-height:240px}}
+    /* Delivery Alert Modal */
+    .dalert-modal .modal-dialog{margin-top:70px;}
+    .dalert-modal .modal-content{border-radius:13px;overflow:hidden;}
+    .dalert-header{background:linear-gradient(135deg,#ea580c,#f97316);border-bottom:none;}
+    .dalert-tabs .nav-link{font-size:12px;font-weight:700;color:#475569;}
+    .dalert-tabs .nav-link.active{color:#0f172a;border-bottom:2px solid #ea580c;background:#f8fafc;}
+    .dalert-footer{justify-content:space-between;align-items:center;border-top:1px solid #e5e7eb;background:#f8fafc;flex-wrap:wrap;gap:8px;}
+    .dalert-suppress-wrap{display:flex;align-items:center;}
+    .dalert-table th,.dalert-table td{font-size:12px;vertical-align:middle;}
+    @media(max-width:575.98px){.dalert-modal .modal-dialog{margin-top:60px;}}
 </style>
 @stop
 
@@ -336,5 +425,19 @@
     function focusMode(){const btn=document.getElementById('dashboardFocusToggle'),exitBtn=document.getElementById('dashboardFocusFloatingExit');if(!btn)return;const key='dashboard.focus.mode';const apply=on=>{document.body.classList.toggle('dashboard-focus-mode',on);btn.innerHTML=on?'<i class="fas fa-compress-arrows-alt"></i> Exit Focus':'<i class="fas fa-expand-arrows-alt"></i> Focus';if(exitBtn)exitBtn.style.display=on?'inline-flex':'none';};const toggle=()=>{const on=!document.body.classList.contains('dashboard-focus-mode');apply(on);localStorage.setItem(key,on?'1':'0');};apply(localStorage.getItem(key)==='1');btn.addEventListener('click',toggle);if(exitBtn)exitBtn.addEventListener('click',()=>{apply(false);localStorage.setItem(key,'0');});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.body.classList.contains('dashboard-focus-mode')){apply(false);localStorage.setItem(key,'0');}});}
     clock();initCalendarNav();calendar();online(seed.onlineSnapshot);present({presentEmployees:seed.presentEmployees,employeeSummary:seed.employeeSummary});stats(seed.todayStats);charts();todo();chatbox();focusMode();setInterval(clock,1000);setInterval(live,30000);
 })();
+@if($deliveryAlert['show'])
+$(document).ready(function(){
+    $('#deliveryAlertModal').modal('show');
+    $('#dalertDismissBtn').on('click',function(){
+        if($('#dalertSuppressToday').is(':checked')){
+            $.post('{{ route('dashboard.suppress-delivery-alert') }}',{_token:'{{ csrf_token() }}'}).always(function(){
+                $('#deliveryAlertModal').modal('hide');
+            });
+        } else {
+            $('#deliveryAlertModal').modal('hide');
+        }
+    });
+});
+@endif
 </script>
 @stop

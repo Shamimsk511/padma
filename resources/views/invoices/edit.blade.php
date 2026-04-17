@@ -1405,14 +1405,14 @@ function handleProductSelection(selectElement) {
 
     if (productId && productId !== '__new__') {
         $.ajax({
-            url: '/product-details/' + productId,
+            url: '/product-details/' + productId + '?customer_id=' + ($('#customer_id').val() || ''),
             type: 'GET',
             dataType: 'json',
             success: function(data) {
                 row.find('.product-description').val(data.name);
                 row.find('.product-company-hidden').val(data.company ? data.company.name : '');
                 row.find('.product-category-hidden').val(data.category ? data.category.name : '');
-                row.find('.product-price').val(data.sale_price);
+                row.find('.product-price').val(data.customer_price);
 
                 row.data('box-pcs', data.category ? data.category.box_pcs : 0);
                 row.data('pieces-feet', data.category ? data.category.pieces_feet : 0);

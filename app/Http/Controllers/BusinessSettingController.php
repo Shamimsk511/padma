@@ -173,6 +173,7 @@ class BusinessSettingController extends Controller
         'return_policy_message' => 'nullable|string',
         'footer_message' => 'nullable|string',
         'customer_qr_expiry_days' => 'nullable|integer|min:1|max:3650',
+        'delivery_alert_enabled' => 'nullable|boolean',
         'timezone' => 'nullable|string|timezone',
         'theme' => 'nullable|string|in:' . implode(',', array_keys(config('themes', []))),
         'weekend_days' => 'nullable|array',
@@ -241,6 +242,7 @@ class BusinessSettingController extends Controller
 
     $invoicePrintOptions['invoice_phone_override'] = trim((string) $request->input('invoice_print_options.invoice_phone_override', ''));
     $validated['invoice_print_options'] = $invoicePrintOptions;
+    $validated['delivery_alert_enabled'] = $request->boolean('delivery_alert_enabled');
 
     // Handle logo upload
     if ($request->hasFile('logo')) {

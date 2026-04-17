@@ -967,13 +967,20 @@ select.modern-select {
     }
 }
 
-/* Remove number input spinners */
-input::-webkit-outer-spin-button,
-input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
+/* Remove number input spinners globally */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none !important;
+    margin: 0 !important;
 }
 
-input[type=number] {
-    -moz-appearance: textfield;
+input[type="number"] {
+    -moz-appearance: textfield !important;
+}
+
+/* Selects inside card headers must keep dark text/background */
+.modern-header select,
+.modern-header select option {
+    color: #1f2937 !important;
+    background: #ffffff !important;
 }

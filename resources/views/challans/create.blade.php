@@ -154,10 +154,18 @@
         
         <!-- Invoice Items Section -->
         <div class="card modern-card mb-4">
-            <div class="card-header modern-header items-header">
-                <h3 class="card-title">
+            <div class="card-header modern-header items-header d-flex align-items-center justify-content-between">
+                <h3 class="card-title mb-0">
                     <i class="fas fa-boxes"></i> Items for Delivery
                 </h3>
+                <div class="d-flex align-items-center" style="gap:8px;">
+                    <label class="text-white mb-0" style="font-size:11px;font-weight:600;white-space:nowrap;">All Units:</label>
+                    <input type="checkbox" id="globalUnitToggle" class="unit-toggle-input">
+                    <label for="globalUnitToggle" class="unit-toggle-label mb-0">
+                        <span class="unit-opt unit-qty">Qty</span>
+                        <span class="unit-opt unit-box">Box/PCS</span>
+                    </label>
+                </div>
             </div>
             <div class="card-body modern-card-body">
                 @if(!$invoiceItems || $invoiceItems->isEmpty())
@@ -746,6 +754,38 @@
             text-align: center;
             color: #0f172a;
         }
+
+        /* Global Unit Toggle */
+        .unit-toggle-input { display: none; }
+        .unit-toggle-label {
+            display: inline-flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1.5px solid rgba(255, 255, 255, 0.35);
+            border-radius: 30px;
+            padding: 2px 3px;
+            cursor: pointer;
+            user-select: none;
+            gap: 2px;
+            height: 28px;
+        }
+        .unit-opt {
+            font-size: 11px;
+            font-weight: 700;
+            padding: 2px 9px;
+            border-radius: 20px;
+            color: rgba(255, 255, 255, 0.55);
+            white-space: nowrap;
+            transition: background 0.2s, color 0.2s;
+        }
+        .unit-toggle-input:not(:checked) + .unit-toggle-label .unit-qty {
+            background: white;
+            color: #059669;
+        }
+        .unit-toggle-input:checked + .unit-toggle-label .unit-box {
+            background: white;
+            color: #ea580c;
+        }
     </style>
 @stop
 
@@ -867,6 +907,7 @@
                                 // Show items table
                                 $('#no-items-alert').hide();
                                 $('#invoice-items-container').removeClass('d-none');
+                                $('#globalUnitToggle').prop('checked', false);
                                 
                                 // Recalculate boxes and pieces for each row
                                 $('.item-row').each(function() {
@@ -923,6 +964,12 @@
             
             // Initialize quantity type handling
             initializeQuantityTypes();
+
+            // Global unit toggle — changes all rows at once
+            $('#globalUnitToggle').on('change', function() {
+                const val = $(this).is(':checked') ? 'box_pieces' : 'quantity';
+                $('.quantity-type').val(val).trigger('change');
+            });
             
             // Item checkbox change
             $(document).on('change', '.item-checkbox', function() {

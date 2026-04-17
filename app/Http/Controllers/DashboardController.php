@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BusinessSetting;
 use App\Models\Invoice;
 use App\Models\Purchase;
 use App\Models\OtherDelivery;
@@ -93,6 +94,7 @@ class DashboardController extends Controller
             'monthlySales' => $this->getMonthlySales(),
             'monthlyTrend' => $this->getMonthlyTrend(),
             'insights' => $this->getInsights(),
+            'deliveryAlert' => $this->getUndeliveredInvoiceAlert(),
         ]));
     }
 
@@ -313,6 +315,61 @@ class DashboardController extends Controller
             'low_stock_count' => Product::where('current_stock', '<=', 5)->count(),
             'due_customer_count' => Customer::where('outstanding_balance', '>', 0)->count(),
             'unpaid_invoice_count' => Invoice::whereIn('payment_status', ['unpaid', 'partial'])->count(),
+        ];
+    }
+
+    public function suppressDeliveryAlert(): \Illuminate\Http\JsonResponse
+    {
+        $date = today()->toDateString();
+        session(['delivery_alert_suppressed_date' => $date]);
+
+        // Persist in a cookie so suppression survives logout (session is destroyed on logout)
+        return response()->json(['ok' => true])
+            ->cookie('dalert_suppressed', $date, 60 * 24); // expires in 24 hours
+    }
+
+    private function getUndeliveredInvoiceAlert(): array
+    {
+        $empty = ['show' => false, 'yesterday' => collect(), 'older' => collect()];
+
+        // Respect the global on/off toggle from business settings
+        $settings = BusinessSetting::first();
+        if (!($settings->delivery_alert_enabled ?? true)) {
+            return $empty;
+        }
+
+        if (!session('delivery_alert_pending')) {
+            return $empty;
+        }
+
+        // Check session first, then fall back to cookie (cookie survives logout)
+        $suppressedDate = session('delivery_alert_suppressed_date')
+            ?? request()->cookie('dalert_suppressed');
+
+        if ($suppressedDate === today()->toDateString()) {
+            session()->forget('delivery_alert_pending');
+            return $empty;
+        }
+
+        session()->forget('delivery_alert_pending');
+
+        $base = Invoice::with('customer')
+            ->whereIn('delivery_status', ['pending', 'partial']);
+
+        $yesterday = (clone $base)
+            ->whereDate('invoice_date', today()->subDay()->toDateString())
+            ->orderBy('invoice_date', 'desc')
+            ->get(['id', 'invoice_number', 'invoice_date', 'customer_id', 'delivery_status', 'total']);
+
+        $older = (clone $base)
+            ->whereDate('invoice_date', '<', today()->subDay()->toDateString())
+            ->orderBy('invoice_date', 'desc')
+            ->get(['id', 'invoice_number', 'invoice_date', 'customer_id', 'delivery_status', 'total']);
+
+        return [
+            'show'      => $yesterday->isNotEmpty() || $older->isNotEmpty(),
+            'yesterday' => $yesterday,
+            'older'     => $older,
         ];
     }
 }
