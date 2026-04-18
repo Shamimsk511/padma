@@ -42,69 +42,49 @@ class TransactionSmsService
             
             $customer = $transaction->customer;
             
-            // Skip if no phone number
             if (!$customer || !$customer->phone) {
-                Log::info("Skipping SMS for transaction {$transaction->id}: No phone number");
                 return false;
             }
-            
-            // Clean and validate phone number
+
             $phone = $this->cleanPhoneNumber($customer->phone);
             if (!$this->isValidBangladeshiPhone($phone)) {
-                Log::warning("Invalid phone number for customer {$customer->id}: {$customer->phone}");
                 return false;
             }
-            
-            // Trigger payment allocation
+
             $this->paymentAllocationService->allocatePayments($customer->id);
-            
-            // For debit transactions, check for recent credit
+
             if ($transaction->type === 'debit' && $transaction->invoice_id) {
                 $invoice = $transaction->invoice;
-                
+
                 $creditTransaction = Transaction::where('invoice_id', $invoice->id)
                     ->where('type', 'credit')
                     ->where('created_at', '>=', now()->subMinutes(5))
                     ->where('id', '<', $transaction->id)
                     ->first();
-                
+
                 if ($creditTransaction) {
-                    Log::info("Skipping payment SMS for transaction {$transaction->id}: Combined SMS will be sent");
                     return false;
                 }
             }
-            
-            // For credit transactions, check for recent debit
+
             if ($transaction->type === 'credit' && $transaction->invoice_id) {
                 $invoice = $transaction->invoice;
-                
+
                 $debitTransaction = Transaction::where('invoice_id', $invoice->id)
                     ->where('type', 'debit')
                     ->where('created_at', '>=', now()->subMinutes(5))
                     ->where('id', '>', $transaction->id)
                     ->first();
-                
+
                 $message = $this->generateInvoiceSmsMessage($transaction, $this->getBusinessName(), $debitTransaction);
             } else {
                 $message = $this->generateSmsMessage($transaction);
             }
-            
-            // Send SMS using old method
-            $response = $this->sendSms($phone, $message);
-            
-            if ($response['success']) {
-                Log::info("SMS sent for transaction {$transaction->id} to {$phone}", [
-                    'provider' => $response['provider'],
-                    'response' => $response['data']
-                ]);
-                return true;
-            } else {
-                Log::error("SMS failed for transaction {$transaction->id}: " . $response['error']);
-                return false;
-            }
-            
-        } catch (\Exception $e) {
-            Log::error("SMS error for transaction {$transaction->id}: " . $e->getMessage());
+
+            $this->sendSms($phone, $message);
+            return true;
+
+        } catch (\Throwable $e) {
             return false;
         }
     }
@@ -351,7 +331,7 @@ class TransactionSmsService
         }
         
         $invoiceNumber = $invoice->invoice_number;
-        $date = $invoice->invoice_date->format('d/m/Y');
+        $date = $invoice->invoice_date ? $invoice->invoice_date->format('d/m/Y') : now()->format('d/m/Y');
         $totalAmount = number_format($invoice->total, 2); // After-discount total
         $customer = $invoice->customer;
         

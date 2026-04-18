@@ -1277,14 +1277,15 @@ public function getCustomerDetails($id)
         ]);
     }
 
-     public function markAsPaid(Invoice $invoice)
+    public function markAsPaid(Invoice $invoice)
     {
         DB::beginTransaction();
         try {
             // Get the actual remaining due amount after payment allocation
             $remainingDue = $this->paymentAllocationService->getInvoiceRemainingDue($invoice);
-            
+
             if ($remainingDue <= 0) {
+                DB::rollBack();
                 return response()->json(['success' => false, 'message' => 'Invoice already paid or overpaid']);
             }
 
@@ -1296,27 +1297,27 @@ public function getCustomerDetails($id)
                 'purpose' => 'Payment for Invoice #' . $invoice->invoice_number,
                 'amount' => $remainingDue,
                 'method' => 'cash',
-                'date' => now(),
                 'note' => 'Invoice marked as paid',
-                'reference' => $invoice->invoice_number
+                'reference' => $invoice->invoice_number,
             ]);
 
             // Re-allocate payments to update all invoice statuses
             $this->paymentAllocationService->allocatePayments($invoice->customer_id);
-// Send SMS for payment - ADD THIS BLOCK
+
+            // Commit the payment before sending SMS so an SMS failure cannot roll back the transaction
+            DB::commit();
+
             try {
                 $this->smsService->sendTransactionSms($transaction);
-            } catch (\Exception $e) {
-                Log::warning("SMS failed for mark as paid transaction {$transaction->id}: " . $e->getMessage());
+            } catch (\Throwable $e) {
+                // SMS failure must not affect the committed payment
             }
-            DB::commit();
-            Log::info('Invoice #' . $invoice->invoice_number . ' marked as paid with amount: ' . $remainingDue);
-            
+
             return response()->json([
-                'success' => true, 
-                'message' => 'Invoice paid successfully with amount: ৳' . number_format($remainingDue, 2)
+                'success' => true,
+                'message' => 'Invoice paid successfully with amount: ৳' . number_format($remainingDue, 2),
             ]);
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             DB::rollBack();
             Log::error('Payment failed: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => 'Payment failed: ' . $e->getMessage()], 500);
